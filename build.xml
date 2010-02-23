@@ -4,7 +4,7 @@
   <property name="sdk.dir" location="${env.APPENGINE_JAVA_SDK}" />
   <property name="git.dir" location="${env.GIT_BIN_DIR}" />
 
-  <property name="packages.dir" location="war/WEB-INF/packages" />
+  <property name="packages.dir" location="packages" />
 
   <import file="${sdk.dir}/config/user/ant-macros.xml" />
 
@@ -21,43 +21,32 @@
   <available file="${packages.dir}" type="dir" property="packages.exists"/>
   
   <target name="init" description="pull in dependencies" unless="packages.exists">
+
     <mkdir dir="${packages.dir}"/>
-
-    <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/narwhal.git"/>
-    </exec>
-    <move file="${basedir}/narwhal/local.json.template" tofile="${basedir}/narwhal/local.json"/>
-    <move file="${basedir}/narwhal/narwhal.conf.template" tofile="${basedir}/narwhal/narwhal.conf"/>
     <exec executable="ln">
-      <arg line="-s ${basedir}/narwhal ${packages.dir}/"/>
+      <arg line="-s ../../packages war/WEB-INF/"/>
     </exec>
 
     <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/jack.git"/>
+      <arg line="clone git://github.com/gmosx/narwhal.git ${packages.dir}/narwhal"/>
     </exec>
-    <exec executable="ln">
-      <arg line="-s ${basedir}/jack ${packages.dir}/"/>
+    <move file="${packages.dir}/narwhal/local.json.template" tofile="${packages.dir}/narwhal/local.json"/>
+    <move file="${packages.dir}/narwhal/narwhal.conf.template" tofile="${packages.dir}/narwhal/narwhal.conf"/>
+
+    <exec executable="${git.dir}/git">
+      <arg line="clone git://github.com/gmosx/jack.git ${packages.dir}/jack"/>
     </exec>
 
     <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/appengine.git"/>
-    </exec>
-    <exec executable="ln">
-      <arg line="-s ${basedir}/appengine ${packages.dir}/"/>
+      <arg line="clone git://github.com/gmosx/appengine.git ${packages.dir}/appengine"/>
     </exec>
 
     <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/normal-template.git"/>
-    </exec>
-    <exec executable="ln">
-      <arg line="-s ${basedir}/normal-template ${packages.dir}/"/>
+      <arg line="clone git://github.com/gmosx/normal-template.git ${packages.dir}/normal-template"/>
     </exec>
 
     <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/tschaub/buildkit.git"/>
-    </exec>
-    <exec executable="ln">
-      <arg line="-s ${basedir}/buildkit ${packages.dir}/"/>
+      <arg line="clone git://github.com/tschaub/buildkit.git ${packages.dir}/buildkit"/>
     </exec>
 
   </target>

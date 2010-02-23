@@ -42,10 +42,6 @@
     </exec>
 
     <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/normal-template.git ${packages.dir}/normal-template"/>
-    </exec>
-
-    <exec executable="${git.dir}/git">
       <arg line="clone git://github.com/tschaub/buildkit.git ${packages.dir}/buildkit"/>
     </exec>
 

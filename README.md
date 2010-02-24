@@ -1,6 +1,7 @@
-GeoExt Builder
-==============
+JavaScript Library Builder
+==========================
 
-App Engine application for building GeoExt.
+Hosted build service for JavaScript library on App Engine.
 
-http://geoext.org
+http://buildjs.appspot.com/
+

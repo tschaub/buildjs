@@ -21,4 +21,11 @@ Handler.prototype = {
     }
 };
 
-exports.Handler = Handler;
+var App = function(methods) {
+    var handler = new Handler(methods);
+    return function(env) {
+        return handler.handle(env);
+    };
+};
+
+exports.App = App;

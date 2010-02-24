@@ -1,13 +1,13 @@
 var ASSETS = require("buildkit/assets");
 var FILE = require("file");
-var Handler = require("./handler").Handler;
+var HANDLER = require("./handler");
 
 // TODO: persist this
 var projects = {
     "/geoext/0.6": true
 };
 
-var handler = new Handler({
+exports.app = HANDLER.App({
     GET: function(env) {
         var path = env.PATH_INFO;
         if (projects[path]) {
@@ -29,7 +29,3 @@ var handler = new Handler({
         return resp;
     }
 });
-
-exports.app = function(env) {
-    return handler.handle(env);
-};

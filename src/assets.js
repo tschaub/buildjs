@@ -20,7 +20,7 @@ exports.app = HANDLER.App({
             }
             resp = {
                 status: 200,
-                headers: {"Content-Type": "text/plain"},
+                headers: {"Content-Type": "text/javascript"},
                 body: [str]
             };
         } else {

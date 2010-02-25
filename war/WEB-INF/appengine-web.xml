@@ -3,4 +3,7 @@
 	<application>buildjs</application>
 	<version>1</version>
 	<precompilation-enabled>false</precompilation-enabled>
+	<static-files>
+      <include path="/favicon.ico" />
+    </static-files>
 </appengine-web-app>

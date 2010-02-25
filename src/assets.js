@@ -2,6 +2,17 @@ var ASSETS = require("buildkit/assets");
 var FILE = require("file");
 var HANDLER = require("./handler");
 
+var DB = require("google/appengine/ext/db");
+
+var Article = DB.Model("Article", {
+    title: new db.StringProperty({required: true}),
+    summary: new db.TextProperty(), 
+    content: new db.TextProperty({required: true}),
+    created: new db.DateTimeProperty({autoNowAdd: true}),
+    updated: new db.DateTimeProperty({autoNow: true}),
+    categories: new db.StringListProperty()
+});
+
 // TODO: persist this
 var projects = {
     "/geoext/0.6": true

@@ -35,7 +35,10 @@ exports.app = HANDLER.App({
             }));
             resp = {
                 status: 200,
-                headers: {"Content-Type": "text/javascript"},
+                headers: {
+                    "Content-Type": "application/x-javascript",
+                    "Content-Disposition": "attachment; filename=GeoExt.js"
+                },
                 body: [str]
             };
         } else {

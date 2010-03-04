@@ -44,9 +44,8 @@ exports.app = HANDLER.App({
             resp = {
                 status: 200,
                 headers: {
-                    "Content-Type": "text/javascript"
-                    //"Content-Type": "application/x-javascript",
-                    //"Content-Disposition": "attachment; filename=GeoExt.js"
+                    "Content-Type": "application/x-javascript",
+                    "Content-Disposition": "attachment; filename=GeoExt.js"
                 },
                 body: [str]
             };

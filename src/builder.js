@@ -1,10 +1,13 @@
 var MERGE = require("buildkit/merge");
 var JSMIN = require("buildkit/jsmin");
 var HANDLER = require("./handler");
+var FILE = require("file");
 
 // TODO: persist this
 var projects = {
-    "/geoext/0.6": true
+    "/geoext/0.6": {
+        license: "license.txt"
+    }
 };
 
 exports.app = HANDLER.App({
@@ -28,16 +31,22 @@ exports.app = HANDLER.App({
                 var body = request.body().decodeToString(request.contentCharset() || "utf-8");
                 config = JSON.decode(body);
             }
+            var root = FILE.join("projects", path);
             var str = JSMIN.jsmin(MERGE.concat({
                 root: ["projects" + path],
                 includes: config.includes || [],
                 excludes: config.excludes || []
             }));
+            var license = projects[path].license;
+            if (license) {
+                str = FILE.read(FILE.join(root, license)) + str;
+            }
             resp = {
                 status: 200,
                 headers: {
-                    "Content-Type": "application/x-javascript",
-                    "Content-Disposition": "attachment; filename=GeoExt.js"
+                    "Content-Type": "text/javascript"
+                    //"Content-Type": "application/x-javascript",
+                    //"Content-Disposition": "attachment; filename=GeoExt.js"
                 },
                 body: [str]
             };

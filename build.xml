@@ -1,119 +1,138 @@
 <project name="appengine-example" default="datanucleusenhance">
-  <property file="build.properties"/>
-  <property environment="env"/>
-  <property name="sdk.dir" location="${env.APPENGINE_JAVA_SDK}" />
-  <property name="git.dir" location="${env.GIT_BIN_DIR}" />
+    <property file="build.properties"/>
+    <property environment="env"/>
+    <property name="sdk.dir" location="${env.APPENGINE_JAVA_SDK}" />
 
-  <property name="packages.dir" location="packages" />
+    <property name="packages" location=".packages" />
 
-  <import file="${sdk.dir}/config/user/ant-macros.xml" />
+    <import file="${sdk.dir}/config/user/ant-macros.xml" />
 
-  <path id="project.classpath">
-    <pathelement path="war/WEB-INF/classes" />
-    <fileset dir="war/WEB-INF/lib">
-      <include name="**/*.jar" />
-    </fileset>
-    <fileset dir="${sdk.dir}/lib">
-      <include name="shared/**/*.jar" />
-    </fileset>
-  </path>
+    <path id="project.classpath">
+        <pathelement path="war/WEB-INF/classes" />
+        <fileset dir="war/WEB-INF/lib">
+            <include name="**/*.jar" />
+        </fileset>
+        <fileset dir="${sdk.dir}/lib">
+            <include name="shared/**/*.jar" />
+        </fileset>
+    </path>
+    
+    <available file="${packages}" type="dir" property="packages.exists"/>
+    
+    <target name="init" description="pull in dependencies" unless="packages.exists">
+        <mkdir dir="${packages}"/>
 
-  <available file="${packages.dir}" type="dir" property="packages.exists"/>
-  
-  <target name="init" description="pull in dependencies" unless="packages.exists">
+        <exec executable="git">
+            <arg line="clone git://github.com/gmosx/narwhal.git ${packages}/narwhal"/>
+        </exec>
+        <move file="${packages}/narwhal/local.json.template" tofile="${packages}/narwhal/local.json"/>
+        <move file="${packages}/narwhal/narwhal.conf.template" tofile="${packages}/narwhal/narwhal.conf"/>
 
-    <mkdir dir="${packages.dir}"/>
-    <exec executable="ln">
-      <arg line="-s ../../packages war/WEB-INF/"/>
-    </exec>
+        <exec executable="git">
+            <arg line="clone git://github.com/gmosx/jack.git ${packages}/jack"/>
+        </exec>
 
-    <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/narwhal.git ${packages.dir}/narwhal"/>
-    </exec>
-    <move file="${packages.dir}/narwhal/local.json.template" tofile="${packages.dir}/narwhal/local.json"/>
-    <move file="${packages.dir}/narwhal/narwhal.conf.template" tofile="${packages.dir}/narwhal/narwhal.conf"/>
+        <exec executable="git">
+            <arg line="clone git://github.com/gmosx/appengine.git ${packages}/appengine"/>
+        </exec>
 
-    <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/jack.git ${packages.dir}/jack"/>
-    </exec>
+        <exec executable="git">
+            <arg line="clone git://github.com/tschaub/buildkit.git ${packages}/buildkit"/>
+        </exec>
+    </target>
+    
+    <target name="war" description="create war" depends="init">
+        <copy todir="war/WEB-INF/packages">
+            <fileset dir="${packages}">
+                <exclude name="**/.git/"/>
+                <exclude name="**/.git*"/>
+                <exclude name="**/examples/"/>
+                <exclude name="**/tests/"/>
+                <exclude name="**/docs/"/>
+                <exclude name="**/zips/"/>
+                <exclude name="**/.tusk/"/>
+                <exclude name="**/*.md"/>
+            </fileset>
+        </copy>
+        <copy todir="war/WEB-INF/src">
+            <fileset dir="src">
+                <exclude name="**/.git/"/>
+                <exclude name="**/.git*"/>
+            </fileset>
+        </copy>
+    </target>
+    
+    <target name="clean" description="clean war">
+        <delete dir="war/WEB-INF/packages"/>
+    </target>
 
-    <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/gmosx/appengine.git ${packages.dir}/appengine"/>
-    </exec>
-
-    <exec executable="${git.dir}/git">
-      <arg line="clone git://github.com/tschaub/buildkit.git ${packages.dir}/buildkit"/>
-    </exec>
-
-  </target>
-
-  <target name="copyjars"
-      description="Copies the App Engine JARs to the WAR.">
-    <copy
-        todir="war/WEB-INF/lib"
-        flatten="true">
-      <fileset dir="${sdk.dir}/lib/user">
+    <target name="copyjars"
+            description="Copies the App Engine JARs to the WAR.">
+        <copy
+                todir="war/WEB-INF/lib"
+                flatten="true">
+            <fileset dir="${sdk.dir}/lib/user">
 <!--
-        <include name="**/*.jar" />
+                <include name="**/*.jar" />
 -->
-        <include name="*.jar" />
-      </fileset>
-    </copy>
-  </target>
+                <include name="*.jar" />
+            </fileset>
+        </copy>
+    </target>
 
-  <target name="compile" depends="copyjars"
-      description="Compiles Java source and copies other source files to the WAR.">
+    <target name="compile" depends="copyjars"
+            description="Compiles Java source and copies other source files to the WAR.">
 <!--
-    <mkdir dir="war/WEB-INF/classes" />
-    <copy todir="war/WEB-INF/classes">
-      <fileset dir="src">
-        <exclude name="**/*.java" />
-      </fileset>
-    </copy>
-    <javac
-        srcdir="src"
-        destdir="war/WEB-INF/classes"
-        classpathref="project.classpath"
-        debug="on" />
+        <mkdir dir="war/WEB-INF/classes" />
+        <copy todir="war/WEB-INF/classes">
+            <fileset dir="src">
+                <exclude name="**/*.java" />
+            </fileset>
+        </copy>
+        <javac
+                srcdir="src"
+                destdir="war/WEB-INF/classes"
+                classpathref="project.classpath"
+                debug="on" />
 -->
-  </target>
+    </target>
 
-  <target name="datanucleusenhance" depends="compile"
-      description="Performs JDO enhancement on compiled data classes.">
+    <target name="datanucleusenhance" depends="compile"
+            description="Performs JDO enhancement on compiled data classes.">
 <!--
-    <enhance_war war="war" />
+        <enhance_war war="war" />
 -->
-  </target>
+    </target>
 
-  <target name="runserver" depends="datanucleusenhance"
-      description="Starts the development server.">
-    <dev_appserver war="war" />
-  </target>
+    <target name="runserver" depends="datanucleusenhance, war"
+            description="Starts the development server.">
+        <dev_appserver war="war" />
+    </target>
 
-  <target name="update" depends="datanucleusenhance"
-      description="Uploads the application to App Engine.">
-    <appcfg action="update" war="war" />
-  </target>
+    <target name="update" depends="datanucleusenhance"
+            description="Uploads the application to App Engine.">
+        <appcfg action="update" war="war" />
+    </target>
 
-  <target name="update_indexes" depends="datanucleusenhance"
-      description="Uploads just the datastore index configuration to App Engine.">
-    <appcfg action="update_indexes" war="war" />
-  </target>
+    <target name="update_indexes" depends="datanucleusenhance"
+            description="Uploads just the datastore index configuration to App Engine.">
+        <appcfg action="update_indexes" war="war" />
+    </target>
 
-  <target name="rollback" depends="datanucleusenhance"
-      description="Rolls back an interrupted application update.">
-    <appcfg action="rollback" war="war" />
-  </target>
+    <target name="rollback" depends="datanucleusenhance"
+            description="Rolls back an interrupted application update.">
+        <appcfg action="rollback" war="war" />
+    </target>
 
-  <target name="request_logs"
-      description="Downloads log data from App Engine for the application.">
-    <appcfg action="request_logs" war="war">
-      <options>
-        <arg value="--num_days=5"/>
-      </options>
-      <args>
-        <arg value="logs.txt"/>
-      </args>
-    </appcfg>
-  </target>
+    <target name="request_logs"
+            description="Downloads log data from App Engine for the application.">
+        <appcfg action="request_logs" war="war">
+            <options>
+                <arg value="--num_days=5"/>
+            </options>
+            <args>
+                <arg value="logs.txt"/>
+            </args>
+        </appcfg>
+    </target>
 </project>

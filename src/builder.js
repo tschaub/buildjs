@@ -19,13 +19,13 @@ exports.app = HANDLER.App({
             var config;
             if (type.match(/form/)) {
                 config = request.POST();
-                var includes = config.includes;
-                if (includes && !(includes instanceof Array)) {
-                    config.includes = [includes];
+                var include = config.include;
+                if (include && !(include instanceof Array)) {
+                    config.include = [include];
                 }
-                var excludes = config.excludes;
-                if (excludes && !(excludes instanceof Array)) {
-                    config.excludes = [excludes];
+                var exclude = config.exclude;
+                if (exclude && !(exclude instanceof Array)) {
+                    config.exclude = [exclude];
                 }
             } else {
                 var body = request.body().decodeToString(request.contentCharset() || "utf-8");
@@ -34,8 +34,8 @@ exports.app = HANDLER.App({
             var root = FILE.join("projects", path);
             var str = JSMIN.jsmin(MERGE.concat({
                 root: ["projects" + path],
-                includes: config.includes || [],
-                excludes: config.excludes || []
+                include: config.include || [],
+                exclude: config.exclude || []
             }));
             var license = projects[path].license;
             if (license) {

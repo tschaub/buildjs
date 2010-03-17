@@ -110,7 +110,7 @@
         <dev_appserver war="war" />
     </target>
 
-    <target name="update" depends="datanucleusenhance"
+    <target name="update" depends="datanucleusenhance, war"
             description="Uploads the application to App Engine.">
         <appcfg action="update" war="war" />
     </target>

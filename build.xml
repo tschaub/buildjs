@@ -47,6 +47,7 @@
                 <exclude name="**/.git/"/>
                 <exclude name="**/.git*"/>
                 <exclude name="**/examples/"/>
+                <exclude name="**/example/"/>
                 <exclude name="**/tests/"/>
                 <exclude name="**/docs/"/>
                 <exclude name="**/zips/"/>

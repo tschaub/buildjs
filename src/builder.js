@@ -6,9 +6,12 @@ var MODELS = require("./models");
 var DB = require("google/appengine/ext/db");
 var getAssets = require("./assets").getAssets;
 
-// TODO: persist this
+// TODO: derive and persist this
 var projects = {
     "/geoext/0.6": {
+        license: "license.txt"
+    },
+    "/geoext/0.7": {
         license: "license.txt"
     }
 };

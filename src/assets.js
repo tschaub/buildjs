@@ -5,9 +5,10 @@ var DB = require("google/appengine/ext/db");
 var MEMCACHE = require("google/appengine/api/memcache");
 var MODELS = require("./models");
 
-// TODO: persist this
+// TODO: derive and persist this
 var projects = {
-    "/geoext/0.6": true
+    "/geoext/0.6": true,
+    "/geoext/0.7": true,
 };
 
 exports.getAssets = function(path) {

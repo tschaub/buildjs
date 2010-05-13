@@ -113,6 +113,7 @@
 
     <target name="update" depends="datanucleusenhance, war"
             description="Uploads the application to App Engine.">
+        <!-- run `appengine-java/bin/appcfg.sh update war` to establish credentials first -->
         <appcfg action="update" war="war" />
     </target>
 

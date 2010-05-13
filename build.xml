@@ -65,6 +65,7 @@
     
     <target name="clean" description="clean war">
         <delete dir="war/WEB-INF/packages"/>
+        <delete dir="war/WEB-INF/src"/>
     </target>
 
     <target name="copyjars"

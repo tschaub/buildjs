@@ -1,7 +1,7 @@
 JavaScript Library Builder
 ==========================
 
-Hosted build service for JavaScript library on App Engine.
+Hosted build service for JavaScript libraries.
 
-http://buildjs.appspot.com/
+http://buildjs.opengeo.org/
 

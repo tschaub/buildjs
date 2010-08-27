@@ -64,6 +64,11 @@
                 <include name="*.jar" />
             </fileset>
         </copy>
+        <copy todir="build/projects">
+            <fileset dir="projects">
+                <exclude name="**/.svn/"/>
+            </fileset>
+        </copy>
     </target>
 
     <target name="runserver" depends="build"

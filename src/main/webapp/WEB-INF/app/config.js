@@ -3,13 +3,13 @@ exports.httpConfig = {
 };
 
 exports.urls = [
-    ["/", {assets: require("./assets").app, builder: require("./builder").app}]
+    [(/^\/assets/), require("./assets").app],
+    [(/^\/builder/), require("./builder").app]
 ];
 
 exports.middleware = [
     require("ringo/middleware/gzip").middleware,        
     require("ringo/middleware/etag").middleware,
-    require("ringo/middleware/responselog").middleware,
     require("ringo/middleware/error").middleware,
     require("ringo/middleware/notfound").middleware
 ];

@@ -1,9 +1,10 @@
 var ASSETS = require("buildkit/assets");
 var FS = require("fs");
-var HANDLER = require("./handler");
 var DB = require("google/appengine/ext/db");
 var MEMCACHE = require("google/appengine/api/memcache");
 var MODELS = require("./models");
+var {Request} = require("ringo/webapp/request");
+var responseForStatus = require("./util").responseForStatus;
 
 // TODO: derive and persist this
 var projects = {
@@ -19,7 +20,7 @@ exports.getAssets = function(path) {
             if (!asset) {
                 asset = new MODELS.Asset({
                     keyName: path,
-                    json: JSON.encode(ASSETS.compile(FS.join("projects", path)))
+                    json: JSON.stringify(ASSETS.compile(FS.join("projects", path)))
                 });
                 asset.put();
             }
@@ -30,13 +31,16 @@ exports.getAssets = function(path) {
     return str;
 };
 
-exports.app = HANDLER.App({
-    GET: function(env) {
-        var path = env.PATH_INFO;
+exports.app = function(env, lib, version) {
+    var resp;
+    var request = new Request(env);
+    if (request.method !== "GET") {
+        resp = responseForStatus(405);
+    } else {
+        var path = request.pathInfo;
         if (projects[path]) {
             var str = exports.getAssets(path);
-            var request = this.getRequest(env);
-            var callback = request.GET("callback");
+            var callback = request.queryParams["callback"];
             if (callback) {
                 str = callback + "(" + str + ")";
             }
@@ -46,8 +50,8 @@ exports.app = HANDLER.App({
                 body: [str]
             };
         } else {
-            resp = this.responseForStatus(400, "project '" + path + "' not found");
+            resp = responseForStatus(404, "project '" + path + "' not found");
         }
-        return resp;
     }
-});
+    return resp;
+};

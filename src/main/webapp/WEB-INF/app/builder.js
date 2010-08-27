@@ -1,10 +1,11 @@
 var MERGE = require("buildkit/merge");
 var JSMIN = require("buildkit/jsmin");
-var HANDLER = require("./handler");
-var FILE = require("file");
+var FS = require("fs");
 var MODELS = require("./models");
 var DB = require("google/appengine/ext/db");
 var getAssets = require("./assets").getAssets;
+var {Request} = require("ringo/webapp/request");
+var responseForStatus = require("./util").responseForStatus;
 
 // TODO: derive and persist this
 var projects = {
@@ -23,7 +24,7 @@ var getSource = function(path) {
         if (!source) {
             source = new MODELS.Source({
                 keyName: path,
-                text: JSMIN.jsmin(FILE.read(FILE.join("projects", path)))
+                text: JSMIN.jsmin(FS.read(FS.join("projects", path)))
             });
             source.put();
         }
@@ -39,7 +40,7 @@ var getLicense = function(path) {
         if (!license) {
             license = new MODELS.License({
                 keyName: path,
-                text: FILE.read(FILE.join("projects", path))
+                text: FS.read(FS.join("projects", path))
             });
             license.put();
         }
@@ -48,15 +49,18 @@ var getLicense = function(path) {
     return str;
 };
 
-exports.app = HANDLER.App({
-    POST: function(env) {
-        var path = env.PATH_INFO;
+exports.app = function(env, lib, version) {
+    var resp;
+    var request = new Request(env);
+    if (request.method !== "POST") {
+        resp = responseForStatus(405);
+    } else {
+        var path = request.pathInfo;
         if (projects[path]) {
-            var request = this.getRequest(env);
-            var type = request.contentType();
+            var type = request.contentType;
             var config;
             if (type.match(/form/)) {
-                config = request.POST();
+                config = request.postParams;
                 var include = config.include;
                 if (include && !(include instanceof Array)) {
                     config.include = [include];
@@ -66,21 +70,21 @@ exports.app = HANDLER.App({
                     config.exclude = [exclude];
                 }
             } else {
-                var body = request.body().decodeToString(request.contentCharset() || "utf-8");
-                config = JSON.decode(body);
+                var body = request.body().decodeToString(request.charset || "utf-8");
+                config = JSON.parse(body);
             }
-            var assets = JSON.decode(getAssets(path));
+            var assets = JSON.parse(getAssets(path));
             var order = MERGE._getOrderedAssets(
                 [], config.include || [], config.exclude || [], [], assets
             );
 
             var str = order.map(function(srcPath) {
-                return getSource(FILE.join(path, srcPath));
+                return getSource(FS.join(path, srcPath));
             }).join("");
 
             var license = projects[path].license;
             if (license) {
-                str = getLicense(FILE.join(path, license)) + str;
+                str = getLicense(FS.join(path, license)) + str;
             }
             resp = {
                 status: 200,
@@ -93,6 +97,6 @@ exports.app = HANDLER.App({
         } else {
             resp = responseForStatus(400, "project '" + path + "' not found");
         }
-        return resp;
     }
-});
+    return resp;
+};

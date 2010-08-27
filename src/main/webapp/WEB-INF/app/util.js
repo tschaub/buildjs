@@ -1,41 +1,10 @@
-var {Request} = require("ringo/webapp/request");
 var {Response} = require("ringo/webapp/response");
 
 var responseForStatus = function(status, msg) {
     var response = new Response(msg || codes[status]);
     response.status = status;
-    return response.close();
+    return response;
 }
-
-var Handler = function(methods) {
-    this.methods = methods;    
-};
-Handler.prototype = {
-    responseForStatus: responseForStatus,
-    handle: function(env) {
-        var request = new Request(env);
-        var name = request.method;
-        var resp;
-        if (name in this.methods) {
-            resp = this.methods[name].apply(this, [env]);
-        } else {
-            resp = this.responseForStatus(405);
-        }
-        return resp;
-    },
-    getRequest: function(env) {
-        return new Request(env);
-    }
-};
-
-var App = function(methods) {
-    var handler = new Handler(methods);
-    return function(env) {
-        return handler.handle(env);
-    };
-};
-
-exports.App = App;
 
 var codes = {
     100: "Continue",
@@ -85,3 +54,5 @@ var codes = {
     505: "HTTP Version Not Supported",
     507: "Insufficient Storage"
 };
+
+exports.responseForStatus = responseForStatus;

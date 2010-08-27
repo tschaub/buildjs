@@ -1,7 +1,9 @@
-<project name="appengine-example" default="datanucleusenhance">
+<project name="buildjs" default="build">
     <property file="build.properties"/>
     <property environment="env"/>
-    <property name="sdk.dir" location="${env.APPENGINE_JAVA_SDK}" />
+    <condition property="sdk.dir" value="${env.APPENGINE_JAVA_SDK}" else="../appengine-java-sdk-1.3.6">
+        <isset property="evn.APPENGINE_JAVA_SDK"/>
+    </condition>
 
     <property name="packages" location=".packages" />
 
@@ -18,29 +20,43 @@
     </path>
     
     <available file="${packages}" type="dir" property="packages.exists"/>
-    
+
     <target name="init" description="pull in dependencies" unless="packages.exists">
         <mkdir dir="${packages}"/>
-
-        <exec executable="git">
-            <arg line="clone git://github.com/gmosx/narwhal.git ${packages}/narwhal"/>
-        </exec>
-        <move file="${packages}/narwhal/local.json.template" tofile="${packages}/narwhal/local.json"/>
-        <move file="${packages}/narwhal/narwhal.conf.template" tofile="${packages}/narwhal/narwhal.conf"/>
-
-        <exec executable="git">
-            <arg line="clone git://github.com/gmosx/jack.git ${packages}/jack"/>
-        </exec>
-
-        <exec executable="git">
-            <arg line="clone git://github.com/gmosx/appengine.git ${packages}/appengine"/>
-        </exec>
-
         <exec executable="git">
             <arg line="clone git://github.com/tschaub/buildkit.git ${packages}/buildkit"/>
         </exec>
     </target>
-    
+
+    <target name="build" depends="init">
+        <mkdir dir="build"/>
+        <copy todir="build">
+            <fileset dir="src/main/webapp"/>
+        </copy>
+        <copy todir="build/WEB-INF/packages">
+            <fileset dir="${packages}">
+                <exclude name="**/.git/"/>
+                <exclude name="**/.git*"/>
+                <exclude name="**/examples/"/>
+                <exclude name="**/example/"/>
+                <exclude name="**/tests/"/>
+                <exclude name="**/docs/"/>
+                <exclude name="**/zips/"/>
+                <exclude name="**/.tusk/"/>
+                <exclude name="**/*.md"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="runserver" depends="build"
+            description="Starts the development server.">
+        <dev_appserver war="build" />
+    </target>
+
+    <target name="clean" description="remove build">
+        <delete dir="build"/>
+    </target>
+
     <target name="war" description="create war" depends="init">
         <copy todir="war/WEB-INF/packages">
             <fileset dir="${packages}">
@@ -63,11 +79,6 @@
         </copy>
     </target>
     
-    <target name="clean" description="clean war">
-        <delete dir="war/WEB-INF/packages"/>
-        <delete dir="war/WEB-INF/src"/>
-    </target>
-
     <target name="copyjars"
             description="Copies the App Engine JARs to the WAR.">
         <copy
@@ -81,7 +92,7 @@
             </fileset>
         </copy>
     </target>
-
+    
     <target name="compile" depends="copyjars"
             description="Compiles Java source and copies other source files to the WAR.">
 <!--
@@ -104,11 +115,6 @@
 <!--
         <enhance_war war="war" />
 -->
-    </target>
-
-    <target name="runserver" depends="datanucleusenhance, war"
-            description="Starts the development server.">
-        <dev_appserver war="war" />
     </target>
 
     <target name="update" depends="datanucleusenhance, war"

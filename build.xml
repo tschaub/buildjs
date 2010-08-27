@@ -19,12 +19,25 @@
         </fileset>
     </path>
     
-    <available file="${packages}" type="dir" property="packages.exists"/>
-
-    <target name="init" description="pull in dependencies" unless="packages.exists">
+    <target name="init" description="pull in dependencies">
         <mkdir dir="${packages}"/>
-        <exec executable="git">
-            <arg line="clone git://github.com/tschaub/buildkit.git ${packages}/buildkit"/>
+        
+        <echo message="pulling in buildkit (ignore fatal warning)"/>
+        <mkdir dir="${packages}/buildkit"/>
+        <exec executable="git" dir="${packages}/buildkit" failonerror="false">
+            <arg line="clone -n git://github.com/tschaub/buildkit.git ."/>
+        </exec>
+        <exec executable="git" dir="${packages}/buildkit" failonerror="true">
+            <arg line="checkout 86eacbd7b3bf62b8e99f46911dd5a633464b8570"/>
+        </exec>
+
+        <echo message="pulling in appengine (ignore fatal warning)"/>
+        <mkdir dir="${packages}/appengine"/>
+        <exec executable="git" dir="${packages}/appengine" failonerror="false">
+            <arg line="clone -n git://github.com/gmosx/appengine.git ."/>
+        </exec>
+        <exec executable="git" dir="${packages}/appengine" failonerror="true">
+            <arg line="checkout f687d331a222c27bec2f28b7222932cdb695a1b9"/>
         </exec>
     </target>
 
@@ -42,8 +55,13 @@
                 <exclude name="**/tests/"/>
                 <exclude name="**/docs/"/>
                 <exclude name="**/zips/"/>
-                <exclude name="**/.tusk/"/>
                 <exclude name="**/*.md"/>
+            </fileset>
+        </copy>
+        <copy todir="build/WEB-INF/lib" flatten="true">
+            <fileset dir="${sdk.dir}/lib/user">
+                <!--<include name="**/*.jar" />-->
+                <include name="*.jar" />
             </fileset>
         </copy>
     </target>
@@ -53,95 +71,13 @@
         <dev_appserver war="build" />
     </target>
 
+    <target name="update" depends="build" description="Uploads the application to App Engine.">
+        <!-- run `appengine-java/bin/appcfg.sh update war` to establish credentials first -->
+        <appcfg action="update" war="build" />
+    </target>
+
     <target name="clean" description="remove build">
         <delete dir="build"/>
     </target>
 
-    <target name="war" description="create war" depends="init">
-        <copy todir="war/WEB-INF/packages">
-            <fileset dir="${packages}">
-                <exclude name="**/.git/"/>
-                <exclude name="**/.git*"/>
-                <exclude name="**/examples/"/>
-                <exclude name="**/example/"/>
-                <exclude name="**/tests/"/>
-                <exclude name="**/docs/"/>
-                <exclude name="**/zips/"/>
-                <exclude name="**/.tusk/"/>
-                <exclude name="**/*.md"/>
-            </fileset>
-        </copy>
-        <copy todir="war/WEB-INF/src">
-            <fileset dir="src">
-                <exclude name="**/.git/"/>
-                <exclude name="**/.git*"/>
-            </fileset>
-        </copy>
-    </target>
-    
-    <target name="copyjars"
-            description="Copies the App Engine JARs to the WAR.">
-        <copy
-                todir="war/WEB-INF/lib"
-                flatten="true">
-            <fileset dir="${sdk.dir}/lib/user">
-<!--
-                <include name="**/*.jar" />
--->
-                <include name="*.jar" />
-            </fileset>
-        </copy>
-    </target>
-    
-    <target name="compile" depends="copyjars"
-            description="Compiles Java source and copies other source files to the WAR.">
-<!--
-        <mkdir dir="war/WEB-INF/classes" />
-        <copy todir="war/WEB-INF/classes">
-            <fileset dir="src">
-                <exclude name="**/*.java" />
-            </fileset>
-        </copy>
-        <javac
-                srcdir="src"
-                destdir="war/WEB-INF/classes"
-                classpathref="project.classpath"
-                debug="on" />
--->
-    </target>
-
-    <target name="datanucleusenhance" depends="compile"
-            description="Performs JDO enhancement on compiled data classes.">
-<!--
-        <enhance_war war="war" />
--->
-    </target>
-
-    <target name="update" depends="datanucleusenhance, war"
-            description="Uploads the application to App Engine.">
-        <!-- run `appengine-java/bin/appcfg.sh update war` to establish credentials first -->
-        <appcfg action="update" war="war" />
-    </target>
-
-    <target name="update_indexes" depends="datanucleusenhance"
-            description="Uploads just the datastore index configuration to App Engine.">
-        <appcfg action="update_indexes" war="war" />
-    </target>
-
-    <target name="rollback" depends="datanucleusenhance"
-            description="Rolls back an interrupted application update.">
-        <appcfg action="rollback" war="war" />
-    </target>
-
-    <target name="request_logs"
-            description="Downloads log data from App Engine for the application.">
-        <appcfg action="request_logs" war="war">
-            <options>
-                <arg value="--num_days=5"/>
-            </options>
-            <args>
-                <arg value="logs.txt"/>
-            </args>
-        </appcfg>
-    </target>
 </project>

@@ -1,7 +1,7 @@
 <project name="buildjs" default="build">
     <property file="build.properties"/>
     <property environment="env"/>
-    <condition property="sdk.dir" value="${env.APPENGINE_JAVA_SDK}" else="../appengine-java-sdk-1.3.6">
+    <condition property="sdk.dir" value="${env.APPENGINE_JAVA_SDK}" else="../appengine-java-sdk-1.3.7">
         <isset property="evn.APPENGINE_JAVA_SDK"/>
     </condition>
 

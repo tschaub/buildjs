@@ -4,7 +4,18 @@ exports.httpConfig = {
 
 exports.urls = [
     [(/^\/assets/), require("./assets").app],
-    [(/^\/builder/), require("./builder").app]
+    [(/^\/builder/), require("./builder").app],
+    ["/", function(env) {
+        return {
+            status: 200,
+            headers: {
+                "Content-Type": "text/html"
+            },
+            body: [
+                "JavaScript build tool hosted by <a href='http://opengeo.org/'>OpenGeo</a>."
+            ]
+        }
+    }]
 ];
 
 exports.middleware = [

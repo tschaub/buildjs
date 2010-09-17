@@ -77,7 +77,7 @@
     </target>
 
     <target name="update" depends="build" description="Uploads the application to App Engine.">
-        <!-- run `appengine-java/bin/appcfg.sh update war` to establish credentials first -->
+        <!-- run `appengine-java/bin/appcfg.sh update build` to establish credentials first -->
         <appcfg action="update" war="build" />
     </target>
 

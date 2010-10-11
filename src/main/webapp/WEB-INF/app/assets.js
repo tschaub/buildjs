@@ -10,6 +10,7 @@ var responseForStatus = require("./util").responseForStatus;
 var projects = {
     "/geoext/0.6": true,
     "/geoext/0.7": true,
+    "/geoext/1.0": true
 };
 
 exports.getAssets = function(path) {

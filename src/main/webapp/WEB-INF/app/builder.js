@@ -14,6 +14,9 @@ var projects = {
     },
     "/geoext/0.7": {
         license: "license.txt"
+    },
+    "/geoext/1.0": {
+        license: "license.txt"
     }
 };
 
